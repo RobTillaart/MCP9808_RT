@@ -1,0 +1,27 @@
+# Syntax Coloring Map For MCP9808
+
+# Datatypes (KEYWORD1)
+MCP9808	KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+setAddress	KEYWORD2
+setConfigRegister	KEYWORD2
+getConfigRegister	KEYWORD2
+setTupper	KEYWORD2
+getTupper	KEYWORD2
+setTlower	KEYWORD2
+getTlower	KEYWORD2
+setTcritical	KEYWORD2
+getTcritical	KEYWORD2
+setAlertPin	KEYWORD2
+hasAlert	KEYWORD2
+getTemperature	KEYWORD2
+getStatus	KEYWORD2
+setResolution	KEYWORD2
+getResolution	KEYWORD2
+getManufacturerID	KEYWORD2
+getDeviceID	KEYWORD2
+getRevision	KEYWORD2
+
+# Constants (LITERAL1)
+
