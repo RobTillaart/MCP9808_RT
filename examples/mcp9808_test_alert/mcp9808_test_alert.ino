@@ -2,7 +2,7 @@
 //    FILE: mcp9808_test_alert.ino
 //  AUTHOR: Rob Tillaart
 // VERSION: 0.1.0
-// PURPOSE: demo alert - EXPERIMENTAL - NOT WORKING YET !!
+// PURPOSE: demo alert - EXPERIMENTAL !
 //    DATE: 2020-11-12
 //    (c) : MIT
 //
