@@ -1,7 +1,7 @@
 //
 //    FILE: mcp9808_test.ino
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PURPOSE: demo
 //    DATE: 2020-05-03
 //    (c) : MIT
@@ -9,20 +9,29 @@
 
 #include "mcp9808.h"
 
-MCP9808 ts(0x24);
-
-uint32_t lastTemp = 0;
+MCP9808 ts(24);
 
 void setup()
 {
   Serial.begin(115200);
   Serial.println(__FILE__);
 
+  test_0();
+  test_1();
+  test_2();
+  test_3();
+}
+
+void test_0()
+{
+  Serial.println();
+  Serial.println(__FUNCTION__);
+
   Serial.print("CONFIG:   ");
-  Serial.println(ts.getConfigRegister());
+  Serial.println(ts.getConfigRegister(), HEX);
   Serial.print("TUPPER:   ");
   Serial.println(ts.getTupper());
-  Serial.print("WLOWER:   ");
+  Serial.print("TLOWER:   ");
   Serial.println(ts.getTlower());
   Serial.print("TCRIT:    ");
   Serial.println(ts.getTcritical());
@@ -36,17 +45,90 @@ void setup()
   Serial.println(ts.getDeviceID());
   Serial.print("Revision: ");
   Serial.println(ts.getRevision());
-
+  Serial.println();
 }
 
-void loop()
+void test_1()
 {
-  uint32_t now = millis();
-  if (now - lastTemp > 2000)
+  Serial.println();
+  Serial.println(__FUNCTION__);
+
+  for (int i = 0; i < 10; i++)
   {
-    lastTemp = now;
-    Serial.print("TAMBIENT: ");
-    Serial.println(ts.getTemperature());   
+    Serial.print(ts.getTemperature(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getStatus(), HEX);
+    Serial.print('\t');
+    Serial.println();
   }
-  // ...
 }
+
+void test_2()
+{
+  Serial.println();
+  Serial.println(__FUNCTION__);
+
+  for (int i = 0; i < 10; i++)
+  {
+    ts.setTlower(i * PI);
+    Serial.print(ts.getTlower(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getTemperature(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getStatus(), HEX);
+    Serial.print('\t');
+    Serial.println();
+  }
+  ts.setTlower(0);
+  Serial.println();
+
+  for (int i = 0; i < 10; i++)
+  {
+    ts.setTupper(i * PI);
+    Serial.print(ts.getTupper(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getTemperature(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getStatus(), HEX);
+    Serial.print('\t');
+    Serial.println();
+  }
+  ts.setTupper(0);
+  Serial.println();
+
+  for (int i = 0; i < 10; i++)
+  {
+    ts.setTcritical(i * 4);
+    Serial.print(ts.getTcritical(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getTemperature(), 4);
+    Serial.print('\t');
+    Serial.print(ts.getStatus(), HEX);
+    Serial.print('\t');
+    Serial.println();
+  }
+  ts.setTcritical(0);
+  Serial.println();
+}
+
+void test_3()
+{
+  Serial.println();
+  Serial.println(__FUNCTION__);
+
+  for (int i = 0; i < 4; i++)
+  {
+    ts.setResolution(i);
+    Serial.print(i);
+    Serial.print('\t');
+    Serial.print(ts.getResolution());
+    Serial.println();
+  }
+  ts.setResolution(3);
+  Serial.println();
+}
+
+
+void loop() {}
+
+// -- END OF FILE --

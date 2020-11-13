@@ -2,7 +2,7 @@
 //
 //    FILE: mcp9808.h
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
@@ -11,10 +11,12 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-// VALID ADDRESSES, max 8 sensors on one bus
-// 0x24 .. 0x31
+// VALID ADDRESSES,
+// max 8 sensors on one bus
+// 24..31 == 0x18..0x1F
 
-// config register masks,
+
+// CONFIG REGISTER MASKS
 // check the datasheet for exact usage
 #define MCP9808_THYSTERESIS     0x0600
 #define MCP9808_SHUTDOWN        0x0100
@@ -33,17 +35,14 @@ class MCP9808
 public:
 #if defined(ESP8266) || defined(ESP32)
   // dataPin and clockPin can be used for ESP8266
-  MCP9808(const uint8_t addr, const uint8_t dataPin = 255, const uint8_t clockPin = 255);
+  MCP9808(const uint8_t address, const uint8_t dataPin = 255, const uint8_t clockPin = 255);
+#else
+  MCP9808(const uint8_t address);
 #endif
-  // ctor for UNO
-  MCP9808(const uint8_t addr);
 
-  void setAddress(const uint8_t address, TwoWire *wire);
+  void      setAddress(const uint8_t address, TwoWire *wire);
 
-  // could become separate functions in later release
-  // ==> 20 getters and setters! big footprint
-  // separate 
-  void      setConfigRegister(uint16_t cfg);
+  void      setConfigRegister(uint16_t config);
   uint16_t  getConfigRegister();
 
   void      setTupper(float f);
@@ -56,8 +55,10 @@ public:
   void      setAlertPin(uint8_t pin);
   bool      hasAlert();
 
+  void      setOffset(float f);
+  float     getOffset();
   float     getTemperature();
-  uint8_t   getStatus();
+  uint8_t   getStatus();        // getTemperature() must be called first 
 
   void      setResolution(uint8_t res);
   uint8_t   getResolution();
@@ -68,7 +69,8 @@ public:
 
 
 private:
-  uint8_t   _status = 0;   // enum
+  float     _offset = 0;
+  uint8_t   _status = 0;
   uint8_t   _alertPin;
   uint8_t   _address;
   TwoWire*  _wire;
