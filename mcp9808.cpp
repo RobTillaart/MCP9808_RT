@@ -1,14 +1,14 @@
 //
 //    FILE: mcp9808.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
 //
 // HISTORY:
-// 0.1.0    2020-05-03
-//
+// 0.1.0    2020-05-03  initial version
+// 0.1.1    2020-11-12  refactor
 
 #include "mcp9808.h"
 
@@ -36,9 +36,10 @@
 */
 
 #if defined(ESP8266) || defined(ESP32)
-MCP9808::MCP9808(uint8_t addr, const uint8_t dataPin, const uint8_t clockPin)
+MCP9808::MCP9808(uint8_t address, const uint8_t dataPin, const uint8_t clockPin)
 {
   _address = address;
+  if ((address < 24) || (_address > 31)) return;
   _wire = &Wire;
 
   if ((dataPin < 255) && (clockPin < 255))
@@ -48,23 +49,24 @@ MCP9808::MCP9808(uint8_t addr, const uint8_t dataPin, const uint8_t clockPin)
     _wire->begin();
   }
 }
-#endif
-
-MCP9808::MCP9808(uint8_t addr)
+#else
+MCP9808::MCP9808(uint8_t address)
 {
-  MCP9808::setAddress(addr, &Wire);
+  MCP9808::setAddress(address, &Wire);
 }
+#endif
 
 void MCP9808::setAddress(const uint8_t address, TwoWire *wire)
 {
+  if ((address < 24) || (address > 31)) return;
   _address = address;
   _wire = wire;
   _wire->begin();
 }
 
-void MCP9808::setConfigRegister(uint16_t cfg)
+void MCP9808::setConfigRegister(uint16_t config)
 {
-  writeReg16(MCP9808_CONFIG, cfg);
+  writeReg16(MCP9808_CONFIG, config);
 }
 
 uint16_t MCP9808::getConfigRegister()
@@ -72,6 +74,9 @@ uint16_t MCP9808::getConfigRegister()
   return readReg16(MCP9808_CONFIG);
 }
 
+// TODO  (idem Tlower Tcrit)
+// there is no validation of f; 
+// return true / false?
 void  MCP9808::setTupper(float f)
 {
   writeFloat(MCP9808_TUPPER, f);
@@ -113,14 +118,24 @@ bool MCP9808::hasAlert()
   return (digitalRead(_alertPin) != LOW);  // alert polarity? HIGH LOW
 }
 
+void MCP9808::setOffset(float f)
+{
+  _offset = f;
+};
+
+float MCP9808::getOffset()
+{
+  return _offset; 
+};
+
 float MCP9808::getTemperature()
 {
-  return readFloat(MCP9808_TA);
+  return readFloat(MCP9808_TA) + _offset;
 }
 
 uint8_t MCP9808::getStatus()
 {
-  // readFloat(MCP9808_TA);
+  // if (_status == 0) getTemperature();  // force read ?
   return _status;
 }
 
@@ -131,12 +146,12 @@ uint16_t MCP9808::getManufacturerID()
 
 uint8_t MCP9808::getDeviceID()
 {
-  return readReg16(MCP9808_MID) >> 8;
+  return readReg16(MCP9808_DID) >> 8;
 }
 
 uint8_t MCP9808::getRevision()
 {
-  return readReg16(MCP9808_MID) & 0xFF;
+  return readReg16(MCP9808_DID) & 0xFF;
 }
 
 void MCP9808::setResolution(uint8_t res)
@@ -168,20 +183,20 @@ float MCP9808::readFloat(uint8_t reg)
   uint16_t val = readReg16(reg);
   if (reg == MCP9808_TA)
   {
-    _status = (val & 0xE000) >> 8;          // _status = ...x xxxx
+    _status = (val & 0xE000) >> 13;
   }
   if (val & 0x1000)
   {
     return 256 - (val & 0x0FFF) * 0.0625;
   }
-  return (val & 0x0FFF) * 0.0625;         // todo optimize same part?
+  return (val & 0x0FFF) * 0.0625;
 }
 
 
 void MCP9808::writeReg8(uint8_t reg, uint8_t value)
 {
   Wire.beginTransmission(_address);
-  Wire.write(reg);
+  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
   Wire.write(value);
   Wire.endTransmission();
 }
@@ -189,7 +204,7 @@ void MCP9808::writeReg8(uint8_t reg, uint8_t value)
 uint8_t MCP9808::readReg8(uint8_t reg)
 {
   Wire.beginTransmission(_address);
-  Wire.write(reg);
+  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
   Wire.endTransmission();
   Wire.requestFrom(_address, (uint8_t)1);
   return Wire.read();
@@ -198,7 +213,7 @@ uint8_t MCP9808::readReg8(uint8_t reg)
 void MCP9808::writeReg16(uint8_t reg, uint16_t value)
 {
   Wire.beginTransmission(_address);
-  Wire.write(reg);
+  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
   Wire.write(value >> 8);
   Wire.write(value & 0xFF);
   Wire.endTransmission();
@@ -207,7 +222,7 @@ void MCP9808::writeReg16(uint8_t reg, uint16_t value)
 uint16_t MCP9808::readReg16(uint8_t reg)
 {
   Wire.beginTransmission(_address);
-  Wire.write(reg);
+  Wire.write(reg & 0x0F);  // force bit 7-4 to 0
   Wire.endTransmission();
   Wire.requestFrom(_address, (uint8_t)2);
   uint16_t val = Wire.read() << 8;
