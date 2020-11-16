@@ -4,15 +4,15 @@ Arduino library for I2C MCP9808 temperature sensor
 
 ## Description
 
-Experimental version
-
-The MCP9808 is a temperature sensor that measures typically in 1/16th of a degree celsius.
+The MCP9808 is a temperature sensor that measures typically in 1/16th == 0.0625 of a degree celsius.
+What makes this sensor interesting is the ALERT pin, which allows triggering of any piece
+of electronics if the temperature hits a predefined value or zone.
 
 
 ### MCP9808 breakout board
 ```
 //
-//  MCP9808 breakout board
+//  Adafruit MCP9808 breakout board
 //  +----------+
 //  |0   ALERT |---------------+--[ 4K7 ]---- +5V
 //  |       A2 |---- GND       |
@@ -37,7 +37,8 @@ The MCP9808 is a temperature sensor that measures typically in 1/16th of a degre
 - **setAddress(const uint8_t address, TwoWire \*wire)** if multiple I2C busses are present one can choose.
 
 **Address**
-max 8 sensors on one I2C bus - 00011xxx where xxx = A2, A1, A0
+max 8 sensors on one I2C bus 
+Normal address = 0011xxx where xxx = A2, A1, A0  
 
 | Address | HEX | A2 | A1 | A0 |
 |:----:|:----:|:----:|:----:|:----:|
@@ -50,10 +51,11 @@ max 8 sensors on one I2C bus - 00011xxx where xxx = A2, A1, A0
 | 30 | 0x1E | 1 | 1 | 0 |
 | 31 | 0x1F | 1 | 1 | 1 |
 
-
+On request manufacturer will provide 1001xxx as base address 
+allowing up to 16 temp sensors on one bus.
 
 ### Temperature and status
-- **setOffset(float f)** set an offset to calibrate or to correct for self heating
+- **setOffset(float offset)** set an offset to calibrate or to correct for self heating. The value of offset is not validated to keep footprint small.
 - **getOffset()** return value of offset (default 0);
 - **getTemperature()** read the ambient temperature.
 - **getStatus()** returns the status bits of the last call to **getTemperature()**
@@ -70,7 +72,7 @@ The value returned by **getStatus()** is the last value read by the call to **Ge
 
 
 ### Resolution
-- **setResolution(uint8_t res)** set the resolution, 
+- **setResolution(uint8_t res)** set the resolution, if res > 3, it is not set.
 - **getResolution()** returns the resolution set
 
 | Value  | Resolution | Conv time (ms) | Samples/s | Notes |
@@ -105,27 +107,31 @@ Check datasheet for the details...
 
 
 ### Temperature limits / thresholds
-- **setTupper(float f)** write upper register, accuracy 0.25°C
+- **setTupper(float temp)** write upper register, accuracy 0.25°C
 - **getTupper()** idem
-- **setTlower(float f)** write lower register, accuracy 0.25°C
+- **setTlower(float temp)** write lower register, accuracy 0.25°C
 - **getTlower()** idem
-- **setTcritical(float f)** write critical register, accuracy 0.25°C
+- **setTcritical(float temp)** write critical register, accuracy 0.25°C
 - **getTcritical()** idem
 
+The values written in these registers, are the trigger values for the status
+read with getStatus. Note that the Hysteresis temperature delta affects the
+value of these triggers.
 
-
-### MCU alert pin (experimental)
-- **setAlertPin(uint8_t pin)** set the (interrupt) pin of the MCU that is connected
-to the Alertpin of the MCP9808
-- **hasAlert()** read the alert pin above. initial minimalistic version that has no
-control over polarity of the alert etc.
-
+The values set are not validated to keep footprint small.
 
 
 ### Miscelaneous
 - **getManufacturerID()** returns 84 (my version)
 - **getDeviceID()** returns 0 (my version)
 - **getRevision()** returns 84 (my version)
+- **getRFU()** returns 29 (my version). Reserved for future use. 
+
+
+### Hidden registers
+The MCP9808 has hidden registers mentioned only on p.16 of the datasheet.
+These are for testing and calibration.
+The library prevents reading / writing them to keep sensors working.
 
 
 

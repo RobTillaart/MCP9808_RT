@@ -1,9 +1,9 @@
 //
-//    FILE: mcp9808_test_alert.ino
+//    FILE: mcp9808_test_alert_polling.ino
 //  AUTHOR: Rob Tillaart
 // VERSION: 0.1.0
-// PURPOSE: demo alert
-//    DATE: 2020-11-12
+// PURPOSE: demo alert to PIN5 of Arduino UNO.
+//    DATE: 2020-11-16
 //    (c) : MIT
 //
 
@@ -12,7 +12,7 @@
 //  +----------+
 //  |0   ALERT |---------------+--[ 4K7 ]---- +5V
 //  |       A2 |---- GND       |
-//  |       A1 |---- GND       +--[ LED ]---- GND  // instead of LED other electronics can be used.
+//  |       A1 |---- GND       +--< INTERRUPT PIN2 ARDUINO
 //  |       A0 |---- GND
 //  |      SDA |---- I2C MCU
 //  |      SCL |---- I2C MCU
@@ -25,13 +25,17 @@
 
 MCP9808 ts(24);
 
+const uint8_t ALERTPIN = 5;     // ADJUST IF NEEDED
+
+
 void setup()
 {
   Serial.begin(115200);
   Serial.println(__FILE__);
 
   // SET TEMPERATURE WINDOW FOR COMPERATOR MODE °C
-  ts.setTlower(21);
+  // small window for 'fast' effect
+  ts.setTlower(22);
   ts.setTupper(23);
   // SET AUTO RESET  (p32 datasheet)
   // same value as Tupper to have auto reset in comparator mode.
@@ -45,6 +49,8 @@ void setup()
   Serial.print("CRIT\t");
   Serial.println(ts.getTcritical());
 
+  pinMode(ALERTPIN, INPUT_PULLUP);
+
   // SET ALERT PARAMETERS
   uint16_t cfg = ts.getConfigRegister();
   cfg &= ~0x0001;      // set comparator mode
@@ -57,6 +63,12 @@ void setup()
 
 void loop()
 {
+  // will keep on alerting until pin = LOW again  
+  // real difference with irq-RISING or CHANGE
+  if (digitalRead(ALERTPIN) == HIGH)
+  {
+    Serial.println("---> ALERT !!!");
+  }
   Serial.print(ts.getConfigRegister() & 0x0010);
   Serial.print('\t');
   Serial.print(ts.getStatus());
