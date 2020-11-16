@@ -13,8 +13,6 @@ setTlower	KEYWORD2
 getTlower	KEYWORD2
 setTcritical	KEYWORD2
 getTcritical	KEYWORD2
-setAlertPin	KEYWORD2
-hasAlert	KEYWORD2
 getTemperature	KEYWORD2
 getStatus	KEYWORD2
 setOffset	KEYWORD2

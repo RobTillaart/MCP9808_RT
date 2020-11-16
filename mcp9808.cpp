@@ -1,7 +1,7 @@
 //
 //    FILE: mcp9808.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
@@ -9,6 +9,9 @@
 // HISTORY:
 // 0.1.0    2020-05-03  initial version
 // 0.1.1    2020-11-12  refactor
+// 0.1.2    2020-11-16  removed hasAlert, removed setAlertPin, 
+//                      added 2 alert examples, refactor low level
+//                      
 
 #include "mcp9808.h"
 
@@ -36,7 +39,7 @@
 */
 
 #if defined(ESP8266) || defined(ESP32)
-MCP9808::MCP9808(uint8_t address, const uint8_t dataPin, const uint8_t clockPin)
+MCP9808::MCP9808(const uint8_t address, const uint8_t dataPin, const uint8_t clockPin)
 {
   _address = address;
   if ((address < 24) || (_address > 31)) return;
@@ -50,7 +53,7 @@ MCP9808::MCP9808(uint8_t address, const uint8_t dataPin, const uint8_t clockPin)
   }
 }
 #else
-MCP9808::MCP9808(uint8_t address)
+MCP9808::MCP9808(const uint8_t address)
 {
   MCP9808::setAddress(address, &Wire);
 }
@@ -74,12 +77,9 @@ uint16_t MCP9808::getConfigRegister()
   return readReg16(MCP9808_CONFIG);
 }
 
-// TODO  (idem Tlower Tcrit)
-// there is no validation of f; 
-// return true / false?
-void  MCP9808::setTupper(float f)
+void  MCP9808::setTupper(float temp)
 {
-  writeFloat(MCP9808_TUPPER, f);
+  writeFloat(MCP9808_TUPPER, temp);
 }
 
 float MCP9808::getTupper()
@@ -87,9 +87,9 @@ float MCP9808::getTupper()
   return readFloat(MCP9808_TUPPER);
 }
 
-void  MCP9808::setTlower(float f)
+void  MCP9808::setTlower(float temp)
 {
-  writeFloat(MCP9808_TLOWER, f);
+  writeFloat(MCP9808_TLOWER, temp);
 }
 
 float MCP9808::getTlower()
@@ -97,9 +97,9 @@ float MCP9808::getTlower()
   return readFloat(MCP9808_TLOWER);
 }
 
-void  MCP9808::setTcritical(float f)
+void  MCP9808::setTcritical(float temp)
 {
-  writeFloat(MCP9808_TCRIT, f);
+  writeFloat(MCP9808_TCRIT, temp);
 }
 
 float MCP9808::getTcritical()
@@ -107,20 +107,9 @@ float MCP9808::getTcritical()
   return readFloat(MCP9808_TCRIT);
 }
 
-void MCP9808::setAlertPin(uint8_t pin)
+void MCP9808::setOffset(float offset)
 {
-  _alertPin = pin;
-  pinMode(pin, INPUT);
-}
-
-bool MCP9808::hasAlert()
-{
-  return (digitalRead(_alertPin) != LOW);  // alert polarity? HIGH LOW
-}
-
-void MCP9808::setOffset(float f)
-{
-  _offset = f;
+  _offset = offset;
 };
 
 float MCP9808::getOffset()
@@ -135,7 +124,6 @@ float MCP9808::getTemperature()
 
 uint8_t MCP9808::getStatus()
 {
-  // if (_status == 0) getTemperature();  // force read ?
   return _status;
 }
 
@@ -164,13 +152,18 @@ uint8_t MCP9808::getResolution()
   return readReg8(MCP9808_RES);
 }
 
+uint16_t MCP9808::getRFU()
+{
+  return readReg16(MCP9808_RFU);
+}
+
+
 ////////////////////////////////////////////////////////////////
 //
 // PRIVATE
 //
 void MCP9808::writeFloat(uint8_t reg, float f)
 {
-  // no range checking for f.
   bool neg = (f < 0.0);
   if (neg) f = -f;
   uint16_t val = uint16_t(f * 4 + 0.5) * 4;
@@ -185,26 +178,27 @@ float MCP9808::readFloat(uint8_t reg)
   {
     _status = (val & 0xE000) >> 13;
   }
-  if (val & 0x1000)
+  if (val & 0x1000)  // negative value
   {
     return 256 - (val & 0x0FFF) * 0.0625;
   }
   return (val & 0x0FFF) * 0.0625;
 }
 
-
 void MCP9808::writeReg8(uint8_t reg, uint8_t value)
 {
+  if (reg > MCP9808_RES) return;  // see p.16
   Wire.beginTransmission(_address);
-  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
+  Wire.write(reg);
   Wire.write(value);
   Wire.endTransmission();
 }
 
 uint8_t MCP9808::readReg8(uint8_t reg)
 {
+  if (reg > MCP9808_RES) return 0;  // see p.16
   Wire.beginTransmission(_address);
-  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
+  Wire.write(reg);
   Wire.endTransmission();
   Wire.requestFrom(_address, (uint8_t)1);
   return Wire.read();
@@ -212,17 +206,19 @@ uint8_t MCP9808::readReg8(uint8_t reg)
 
 void MCP9808::writeReg16(uint8_t reg, uint16_t value)
 {
+  if (reg > MCP9808_RES) return;  // see p.16
   Wire.beginTransmission(_address);
-  Wire.write(reg & 0x0F);   // force bit 7-4 to 0
-  Wire.write(value >> 8);
-  Wire.write(value & 0xFF);
+  Wire.write(reg);
+  Wire.write(value >> 8);   // hi byte
+  Wire.write(value & 0xFF); // lo byte
   Wire.endTransmission();
 }
 
 uint16_t MCP9808::readReg16(uint8_t reg)
 {
+  if (reg > MCP9808_RES) return 0;  // see p.16
   Wire.beginTransmission(_address);
-  Wire.write(reg & 0x0F);  // force bit 7-4 to 0
+  Wire.write(reg);
   Wire.endTransmission();
   Wire.requestFrom(_address, (uint8_t)2);
   uint16_t val = Wire.read() << 8;

@@ -45,6 +45,8 @@ void test_0()
   Serial.println(ts.getDeviceID());
   Serial.print("Revision: ");
   Serial.println(ts.getRevision());
+  Serial.print("RFU: ");
+  Serial.println(ts.getRFU());
   Serial.println();
 }
 

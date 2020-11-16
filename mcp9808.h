@@ -2,7 +2,7 @@
 //
 //    FILE: mcp9808.h
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
@@ -45,20 +45,19 @@ public:
   void      setConfigRegister(uint16_t config);
   uint16_t  getConfigRegister();
 
-  void      setTupper(float f);
+  void      setTupper(float temp);
   float     getTupper();
-  void      setTlower(float f);
+  void      setTlower(float temp);
   float     getTlower();
-  void      setTcritical(float f);
+  void      setTcritical(float temp);
   float     getTcritical();
 
-  void      setAlertPin(uint8_t pin);
-  bool      hasAlert();
-
-  void      setOffset(float f);
+  void      setOffset(float offset);
   float     getOffset();
   float     getTemperature();
-  uint8_t   getStatus();        // getTemperature() must be called first 
+  // getStatus() returns 0..7
+  // to get latest status, getTemperature() must be called first 
+  uint8_t   getStatus();        
 
   void      setResolution(uint8_t res);
   uint8_t   getResolution();
@@ -67,17 +66,19 @@ public:
   uint8_t   getDeviceID();
   uint8_t   getRevision();
 
+  // Reserved Register, not used
+  uint16_t  getRFU();
+
 
 private:
   float     _offset = 0;
-  uint8_t   _status = 0;
-  uint8_t   _alertPin;
+  uint8_t   _status = 0;     // 0..7
   uint8_t   _address;
   TwoWire*  _wire;
 
-  
   void      writeFloat(uint8_t reg, float f);
   float     readFloat(uint8_t reg);
+
   void      writeReg8(uint8_t reg, uint8_t value);
   uint8_t   readReg8(uint8_t reg);
   void      writeReg16(uint8_t reg, uint16_t value);
