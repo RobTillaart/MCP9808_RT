@@ -1,17 +1,17 @@
 //
 //    FILE: mcp9808.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.2
+// VERSION: 0.1.3
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
 //
-// HISTORY:
-// 0.1.0    2020-05-03  initial version
-// 0.1.1    2020-11-12  refactor
-// 0.1.2    2020-11-16  removed hasAlert, removed setAlertPin, 
+//  HISTORY:
+//  0.1.0   2020-05-03  initial version
+//  0.1.1   2020-11-12  refactor
+//  0.1.2   2020-11-16  removed hasAlert, removed setAlertPin, 
 //                      added 2 alert examples, refactor low level
-//                      
+//  0.1.3   2021-01-01  arduino-ci + unit test                    
 
 #include "mcp9808.h"
 
@@ -59,12 +59,19 @@ MCP9808::MCP9808(const uint8_t address)
 }
 #endif
 
-void MCP9808::setAddress(const uint8_t address, TwoWire *wire)
+bool MCP9808::setAddress(const uint8_t address, TwoWire *wire)
 {
-  if ((address < 24) || (address > 31)) return;
+  if ((address < 24) || (address > 31)) return false;
   _address = address;
   _wire = wire;
   _wire->begin();
+  return true;
+}
+
+bool MCP9808::isConnected()
+{
+  Wire.beginTransmission(_address);
+  return (Wire.endTransmission() == 0);
 }
 
 void MCP9808::setConfigRegister(uint16_t config)

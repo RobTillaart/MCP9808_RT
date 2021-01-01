@@ -1,3 +1,8 @@
+
+[![Arduino CI](https://github.com/RobTillaart/MCP9808_RT/workflows/Arduino%20CI/badge.svg)](https://github.com/marketplace/actions/arduino_ci)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/RobTillaart/MCP9808_RT/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/RobTillaart/MCP9808_RT.svg?maxAge=3600)](https://github.com/RobTillaart/MCP9808_RT/releases)
+
 # MCP9808_RT
 
 Arduino library for I2C MCP9808 temperature sensor
@@ -32,6 +37,7 @@ of electronics if the temperature hits a predefined value or zone.
 ## Interface
 
 ### Constructor
+
 - **MCP9808(const uint8_t addr)** constructor for e.g. UNO
 - **MCP9808(const uint8_t addr, const uint8_t dataPin = 255, const uint8_t clockPin = 255)** constructor for ESP32 and ESP8266
 - **setAddress(const uint8_t address, TwoWire \*wire)** if multiple I2C busses are present one can choose.
@@ -54,7 +60,9 @@ Normal address = 0011xxx where xxx = A2, A1, A0
 On request manufacturer will provide 1001xxx as base address 
 allowing up to 16 temp sensors on one bus.
 
+
 ### Temperature and status
+
 - **setOffset(float offset)** set an offset to calibrate or to correct for self heating. The value of offset is not validated to keep footprint small.
 - **getOffset()** return value of offset (default 0);
 - **getTemperature()** read the ambient temperature.
@@ -69,9 +77,8 @@ The value returned by **getStatus()** is the last value read by the call to **Ge
 | 2    | 0x04 | TA ≥ TCRIT  | **larger or equal** |
 
 
-
-
 ### Resolution
+
 - **setResolution(uint8_t res)** set the resolution, if res > 3, it is not set.
 - **getResolution()** returns the resolution set
 
@@ -83,8 +90,8 @@ The value returned by **getStatus()** is the last value read by the call to **Ge
 | 3    | 0.0625°C | 250 | 4 | **default** |
 
 
-
 ### Config
+
 - **setConfigRegister(uint16_t cfg)**
 - **getConfigRegister()**
 
@@ -105,8 +112,8 @@ The value returned by **getStatus()** is the last value read by the call to **Ge
 Check datasheet for the details...
 
 
-
 ### Temperature limits / thresholds
+
 - **setTupper(float temp)** write upper register, accuracy 0.25°C
 - **getTupper()** idem
 - **setTlower(float temp)** write lower register, accuracy 0.25°C
@@ -122,6 +129,7 @@ The values set are not validated to keep footprint small.
 
 
 ### Miscelaneous
+
 - **getManufacturerID()** returns 84 (my version)
 - **getDeviceID()** returns 0 (my version)
 - **getRevision()** returns 84 (my version)
@@ -132,7 +140,6 @@ The values set are not validated to keep footprint small.
 The MCP9808 has hidden registers mentioned only on p.16 of the datasheet.
 These are for testing and calibration.
 The library prevents reading / writing them to keep sensors working.
-
 
 
 ## Operation
