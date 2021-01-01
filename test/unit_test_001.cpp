@@ -69,7 +69,7 @@ unittest(test_constructor)
   fprintf(stderr, "VERSION: %s\n", "-");
 
   MCP9808 ts(24);
-  assertTrue(ts.setAddress( (uint8_t)24) );
+  assertTrue(ts.setAddress(24, &Wire) );
   assertTrue(ts.isConnected());
 }
 
