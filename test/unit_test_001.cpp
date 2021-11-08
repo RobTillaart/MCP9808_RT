@@ -50,7 +50,7 @@ unittest_teardown()
 
 unittest(test_constructor)
 {
-  fprintf(stderr, "VERSION: %s\n", "-");
+  fprintf(stderr, "VERSION: %s\n", (char *) MCP9808_LIB_VERSION);
 
   MCP9808 ts(24);
   assertTrue(ts.setAddress(24, &Wire) );

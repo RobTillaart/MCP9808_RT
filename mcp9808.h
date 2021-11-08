@@ -44,7 +44,7 @@ public:
   MCP9808(const uint8_t address);
 #endif
 
-  bool      setAddress(const uint8_t address, TwoWire *wire = Wire);
+  bool      setAddress(const uint8_t address, TwoWire *wire = &Wire);
   bool      isConnected();
 
   void      setConfigRegister(uint16_t configuration);

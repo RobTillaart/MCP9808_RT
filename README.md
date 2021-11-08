@@ -14,7 +14,7 @@ Arduino library for I2C MCP9808 temperature sensor.
 ## Description
 
 The MCP9808 is a temperature sensor that measures typically in 1/16th == 0.0625 ° Celsius.
-What makes this sensor interesting is the ALERT pin, which allows triggering of any piece
+What makes this sensor interesting is the **ALERT** pin, which allows triggering of any piece
 of electronics if the temperature hits a predefined value or zone.
 
 
@@ -42,14 +42,15 @@ of electronics if the temperature hits a predefined value or zone.
 
 ### Constructor
 
-- **MCP9808(const uint8_t addr)** constructor for e.g. UNO.
-- **MCP9808(const uint8_t addr, const uint8_t dataPin = 255, const uint8_t clockPin = 255)** constructor for ESP32 and ESP8266.
-- **bool setAddress(const uint8_t address, TwoWire \*wire)** if multiple I2C buses are present one can choose.
+- **MCP9808(const uint8_t address)** constructor for e.g. UNO.
+- **MCP9808(const uint8_t address, const uint8_t dataPin = 255, const uint8_t clockPin = 255)** constructor for ESP32 and ESP8266.
+- **bool setAddress(const uint8_t address, TwoWire \*wire = &Wire)** if multiple I2C buses are present one can choose.
+Default I2C bus is Wire.
 
 
 #### Address
 
-max 8 sensors on one I2C bus 
+There ar max 8 sensors on one I2C bus.
 Normal address = 0011xxx where xxx = A2, A1, A0  
 
 | Address |  HEX   |  A2  |  A1  |  A0  |
@@ -99,6 +100,9 @@ A value of 6 == mask == 110 means that TA is above the upper and above the criti
 | 3      | 0.0625°C   | 250            | 4         | default |
 
 
+Note: for the same resolution it is about 3x faster than a DS18B20.
+
+
 ### Configuration
 
 - **void setConfigRegister(uint16_t configuration)** see table below + read datasheet.
@@ -134,7 +138,7 @@ The values written in these registers, are the trigger values for the status
 read with getStatus. Note that the Hysteresis temperature delta affects the
 value of these triggers.
 
-The values set are not validated to keep footprint small.
+The values set are not validated to keep footprint of the library small.
 
 
 ### Miscellaneous
@@ -161,4 +165,6 @@ See examples
 
 - update documentation
 - do unit test
-- 
+- add more examples for the **ALERT**
+-
+
