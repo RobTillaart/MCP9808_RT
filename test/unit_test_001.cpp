@@ -29,6 +29,7 @@
 // assertNAN(arg);                                 // isnan(a)
 // assertNotNAN(arg);                              // !isnan(a)
 
+
 #include <ArduinoUnitTests.h>
 
 
@@ -56,6 +57,7 @@ unittest(test_constructor)
   assertTrue(ts.isConnected());
 }
 
+
 unittest(test_offset)
 {
   MCP9808 ts(24);
@@ -66,6 +68,7 @@ unittest(test_offset)
     assertEqualFloat(i * 0.1, ts.getOffset(), 0.0001);
   }
 }
+
 
 unittest_main()
 
