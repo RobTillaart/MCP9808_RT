@@ -1,7 +1,7 @@
 //
 //    FILE: mcp9808.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.2.0
+// VERSION: 0.2.1
 // PURPOSE: Arduino Library for I2C mcp9808 temperature sensor
 //    DATE: 2020-05-03
 //     URL: https://github.com/RobTillaart/MCP9808_RT
@@ -16,6 +16,7 @@
 //                      default offset for offset
 //                      default Wire for I2C bus - setAddress()
 //  0.2.0   2021-11-19  fix #7 negative temperature
+//  0.2.1   2021-12-21  update library.json, license, minor edits
 
 
 #include "mcp9808.h"
