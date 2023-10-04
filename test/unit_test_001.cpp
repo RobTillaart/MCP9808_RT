@@ -66,8 +66,7 @@ unittest(test_constants)
 //  TODO more can be tested if there is a Godmode->Wire stub
 unittest(test_constructor)
 {
-  MCP9808 ts(24);
-  assertTrue(ts.setAddress(24, &Wire) );
+  MCP9808 ts(24, &Wire);
   assertTrue(ts.isConnected());
 }
 
