@@ -216,7 +216,11 @@ float MCP9808::readFloat(uint8_t reg)
 
 int MCP9808::writeReg8(uint8_t reg, uint8_t value)
 {
-  if (reg > MCP9808_RES) return;      //  see p.16
+  if (reg > MCP9808_RES)  //  see p.16
+  {
+    //  error handling
+    return 0;
+  }
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _wire->write(value);
@@ -228,7 +232,11 @@ int MCP9808::writeReg8(uint8_t reg, uint8_t value)
 
 uint8_t MCP9808::readReg8(uint8_t reg)
 {
-  if (reg > MCP9808_RES) return 0;    //  see p.16
+  if (reg > MCP9808_RES)  //  see p.16
+  {
+    //  error handling
+    return 0;
+  }
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _wire->endTransmission();
@@ -241,7 +249,11 @@ uint8_t MCP9808::readReg8(uint8_t reg)
 
 int MCP9808::writeReg16(uint8_t reg, uint16_t value)
 {
-  if (reg > MCP9808_RES) return;      //  see p.16
+  if (reg > MCP9808_RES)  //  see p.16
+  {
+    //  error handling
+    return 0;
+  }
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _wire->write(value >> 8);       //  hi byte
@@ -254,7 +266,11 @@ int MCP9808::writeReg16(uint8_t reg, uint16_t value)
 
 uint16_t MCP9808::readReg16(uint8_t reg)
 {
-  if (reg > MCP9808_RES) return 0;    //  see p.16
+  if (reg > MCP9808_RES)  //  see p.16
+  {
+    //  error handling
+    return 0;
+  }
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _wire->endTransmission();

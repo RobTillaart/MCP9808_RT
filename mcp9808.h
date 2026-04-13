@@ -77,7 +77,7 @@ private:
   uint8_t   _address;
   TwoWire*  _wire;
 
-  void      writeFloat(uint8_t reg, float f);
+  int       writeFloat(uint8_t reg, float f);
   float     readFloat(uint8_t reg);
 
   int       writeReg8(uint8_t reg, uint8_t value);
